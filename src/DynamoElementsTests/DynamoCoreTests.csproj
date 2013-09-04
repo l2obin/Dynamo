@@ -55,6 +55,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PersistentSettingsTests.cs" />
     <Compile Include="CoreTests.cs" />
     <Compile Include="CoreDynTests.cs" />
     <Compile Include="DynamoUnitTest.cs" />
