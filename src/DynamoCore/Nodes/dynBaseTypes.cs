@@ -345,11 +345,6 @@ namespace Dynamo.Nodes
         {
             return args[0];
         }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return inputAstNodes.Count > 0 ? inputAstNodes[0] : AstBuilder.BuildNullNode();
-        }
     }
 
     #region Functions
@@ -393,11 +388,6 @@ namespace Dynamo.Nodes
             OutPortData.Add(new PortData("rev", "Reversed list", typeof(Value.List)));
 
             RegisterAllPorts();
-        }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildFunctionCall("Reverse", inputAstNodes);
         }
     }
 
@@ -445,11 +435,6 @@ namespace Dynamo.Nodes
             return ((Value.Function)Controller.FSchemeEnvironment.LookupSymbol("list"))
                 .Item.Invoke(args);
         }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildExprList(inputAstNodes);
-        }
     }
 
     [NodeName("Sort With Comparitor")]
@@ -465,47 +450,6 @@ namespace Dynamo.Nodes
             OutPortData.Add(new PortData("sorted", "Sorted list", typeof(Value.List)));
 
             RegisterAllPorts();
-        }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildFunctionCall("Sort", inputAstNodes);
-        }
-    }
-
-    [NodeName("Sort By Key")]
-    [NodeCategory(BuiltinNodeCategories.CORE_LISTS)]
-    [NodeDescription("Returns a sorted list, using the given key mapper. The key mapper must return either all numbers or all strings.")]
-    public class SortBy : BuiltinFunction
-    {
-        public SortBy()
-            : base(FScheme.SortBy)
-        {
-            InPortData.Add(new PortData("f(x)", "Key Mapper", typeof(object), Value.NewFunction(Utils.ConvertToFSchemeFunc(FScheme.Identity))));
-            InPortData.Add(new PortData("list", "List to sort", typeof(Value.List)));
-            OutPortData.Add(new PortData("sorted", "Sorted list", typeof(Value.List)));
-
-            RegisterAllPorts();
-        }
-    }
-
-    [NodeName("Sort")]
-    [NodeCategory(BuiltinNodeCategories.CORE_LISTS)]
-    [NodeDescription("Returns a sorted list of numbers or strings.")]
-    public class Sort : BuiltinFunction
-    {
-        public Sort()
-            : base(FScheme.Sort)
-        {
-            InPortData.Add(new PortData("list", "List of numbers or strings to sort", typeof(Value.List)));
-            OutPortData.Add(new PortData("sorted", "Sorted list", typeof(Value.List)));
-
-            RegisterAllPorts();
-        }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildFunctionCall("Sort", inputAstNodes);
         }
     }
 
@@ -616,16 +560,6 @@ namespace Dynamo.Nodes
             RegisterAllPorts();
 
             ArgumentLacing = LacingStrategy.Longest;
-        }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            RangeExprNode range = new RangeExprNode();
-            range.FromNode = inputAstNodes[0];
-            range.ToNode = inputAstNodes[1];
-            range.StepNode = inputAstNodes[2];
-            range.stepoperator = ProtoCore.DSASM.RangeStepOperator.stepsize;
-            return range;
         }
     }
 
@@ -935,17 +869,6 @@ namespace Dynamo.Nodes
 
             RegisterAllPorts();
         }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            List<AssociativeNode> arguments = new List<AssociativeNode>
-            {
-                inputAstNodes[1],
-                inputAstNodes[0],
-                AstBuilder.BuildIntNode(0)
-            };
-            return AstBuilder.BuildFunctionCall("Insert", arguments);
-        }
     }
 
     [NodeName("Take From List")]
@@ -961,27 +884,6 @@ namespace Dynamo.Nodes
             OutPortData.Add(new PortData("elements", "List of extraced elements", typeof(Value.List)));
 
             RegisterAllPorts();
-        }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            // return list[x..(y - 1)]
-            var listExpr = inputAstNodes[1] as ArrayNameNode;
-            if (listExpr == null)
-            {
-                return AstBuilder.BuildNullNode();
-            }
-
-            var const1 = AstBuilder.BuildIntNode(1);
-            var toExpr = AstBuilder.BuildBinaryExpression(inputAstNodes[0], const1, ProtoCore.DSASM.Operator.sub);
-            RangeExprNode range = new RangeExprNode();
-            range.FromNode = AstBuilder.BuildIntNode(0);
-            range.ToNode = toExpr;
-            range.StepNode = const1;
-            range.stepoperator = ProtoCore.DSASM.RangeStepOperator.stepsize;
-
-            listExpr.ArrayDimensions.Expr = range;
-            return listExpr;
         }
     }
 
@@ -1077,19 +979,6 @@ namespace Dynamo.Nodes
                 throw new Exception("\"index\" argument not a number or a list of numbers.");
             }
         }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            var listExpr = inputAstNodes[1] as ArrayNameNode;
-            Debug.Assert(listExpr != null);
-            if (listExpr == null)
-            {
-                return AstBuilder.BuildNullNode();
-            }
-
-            listExpr.ArrayDimensions.Expr = inputAstNodes[0];
-            return listExpr;
-        }
     }
 
     [NodeName("Slice List")]
@@ -1156,12 +1045,6 @@ namespace Dynamo.Nodes
             {
                 throw new Exception("\"index\" argument not a number or a list of numbers.");
             }
-        }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            inputAstNodes.Reverse();
-            return AstBuilder.BuildFunctionCall("Remove", inputAstNodes);
         }
     }
 
@@ -1237,18 +1120,6 @@ namespace Dynamo.Nodes
             set { }
         }
 
-        protected override AssociativeNode DefaultAstExpression
-        {
-            get
-            {
-                if (defaultAstExpression == null)
-                {
-                    defaultAstExpression = new ExprListNode();
-                }
-                return defaultAstExpression;
-            }
-        }
-
         protected internal override INode Build(Dictionary<NodeModel, Dictionary<int, INode>> preBuilt, int outPort)
         {
             Dictionary<int, INode> result;
@@ -1275,13 +1146,6 @@ namespace Dynamo.Nodes
 
             RegisterAllPorts();
         }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            var lhs = AstBuilder.BuildFunctionCall("Count", inputAstNodes);
-            var rhs = AstBuilder.BuildIntNode(0);
-            return AstBuilder.BuildBinaryExpression(lhs, rhs, ProtoCore.DSASM.Operator.eq);
-        }
     }
 
     [NodeName("List Length")]
@@ -1297,11 +1161,6 @@ namespace Dynamo.Nodes
             OutPortData.Add(new PortData("length", "Length of the list", typeof(object)));
 
             RegisterAllPorts();
-        }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildFunctionCall("Count", inputAstNodes);
         }
     }
 
@@ -1319,11 +1178,6 @@ namespace Dynamo.Nodes
 
             RegisterAllPorts();
         }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildFunctionCall("Concat", inputAstNodes);
-        }
     }
 
     [NodeName("First of List")]
@@ -1338,18 +1192,6 @@ namespace Dynamo.Nodes
             OutPortData.Add(new PortData("first", "First element in the list", typeof(object)));
 
             RegisterAllPorts();
-        }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            var listExpr = inputAstNodes[0] as ArrayNameNode;
-            Debug.Assert(listExpr != null);
-            if (listExpr == null)
-            {
-                return AstBuilder.BuildNullNode();
-            }
-            listExpr.ArrayDimensions.Expr = AstBuilder.BuildIntNode(0);
-            return listExpr;
         }
     }
 
@@ -1599,11 +1441,6 @@ namespace Dynamo.Nodes
             OutPortData.Add(new PortData("", "Transposed list of lists.", typeof(Value.List)));
 
             RegisterAllPorts();
-        }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildFunctionCall("Transpose", inputAstNodes);
         }
     }
 
@@ -1865,11 +1702,6 @@ namespace Dynamo.Nodes
             int amt = -1;
             return Value.NewList(Utils.SequenceToFSharpList(Flatten(list, ref amt)));
         }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildFunctionCall("Flatten", inputAstNodes);
-        }
     }
 
     [NodeName("Flatten")]
@@ -1935,14 +1767,6 @@ namespace Dynamo.Nodes
     public class LessThan : Comparison
     {
         public LessThan() : base(FScheme.LT, "<") { }
-
-        // might be moved back to Comparision
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildBinaryExpression(inputAstNodes[0],
-                                                    inputAstNodes[1],
-                                                    ProtoCore.DSASM.Operator.lt);
-        }
     }
 
     [NodeName("Less Than Or Equal")]
@@ -1952,14 +1776,6 @@ namespace Dynamo.Nodes
     public class LessThanEquals : Comparison
     {
         public LessThanEquals() : base(FScheme.LTE, "≤") { }
-
-        // might be moved back to Comparision
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildBinaryExpression(inputAstNodes[0],
-                                                    inputAstNodes[1],
-                                                    ProtoCore.DSASM.Operator.le);
-        }
     }
 
     [NodeName("Greater Than")]
@@ -1969,13 +1785,6 @@ namespace Dynamo.Nodes
     public class GreaterThan : Comparison
     {
         public GreaterThan() : base(FScheme.GT, ">") { }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildBinaryExpression(inputAstNodes[0],
-                                                    inputAstNodes[1],
-                                                    ProtoCore.DSASM.Operator.gt);
-        }
     }
 
     [NodeName("Greater Than Or Equal")]
@@ -1985,13 +1794,6 @@ namespace Dynamo.Nodes
     public class GreaterThanEquals : Comparison
     {
         public GreaterThanEquals() : base(FScheme.GTE, "≥") { }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildBinaryExpression(inputAstNodes[0],
-                                                    inputAstNodes[1],
-                                                    ProtoCore.DSASM.Operator.ge);
-        }
     }
 
     [NodeName("Equal")]
@@ -2000,13 +1802,6 @@ namespace Dynamo.Nodes
     public class Equal : Comparison
     {
         public Equal() : base(FScheme.EQ, "=") { }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildBinaryExpression(inputAstNodes[0],
-                                                    inputAstNodes[1],
-                                                    ProtoCore.DSASM.Operator.eq);
-        }
     }
 
     [NodeName("And")]
@@ -2066,13 +1861,6 @@ namespace Dynamo.Nodes
             }
             preBuilt[this] = result;
             return result[outPort];
-        }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildBinaryExpression(inputAstNodes[0],
-                                                    inputAstNodes[1],
-                                                    ProtoCore.DSASM.Operator.and);
         }
     }
 
@@ -2135,13 +1923,6 @@ namespace Dynamo.Nodes
             preBuilt[this] = result;
             return result[outPort];
         }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildBinaryExpression(inputAstNodes[0],
-                                                    inputAstNodes[1],
-                                                    ProtoCore.DSASM.Operator.or);
-        }
     }
 
     [NodeName("Xor")]
@@ -2157,16 +1938,6 @@ namespace Dynamo.Nodes
             OutPortData.Add(new PortData("a⊻b", "result", typeof(bool)));
             RegisterAllPorts();
         }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            var p1 = inputAstNodes[0];
-            var p2 = inputAstNodes[1];
-            var expr1 = AstBuilder.BuildBinaryExpression(p1, p2, ProtoCore.DSASM.Operator.or); 
-            var expr2 = AstBuilder.BuildBinaryExpression(p1, p2, ProtoCore.DSASM.Operator.and);
-            var nexpr2 = AstBuilder.BuildUnaryExpression(expr2, ProtoCore.DSASM.UnaryOperator.Not);
-            return AstBuilder.BuildBinaryExpression(expr1, nexpr2, ProtoCore.DSASM.Operator.and);
-        }
     }
 
     [NodeName("Not")]
@@ -2181,13 +1952,6 @@ namespace Dynamo.Nodes
             InPortData.Add(new PortData("a", "operand", typeof(bool)));
             OutPortData.Add(new PortData("!a", "result", typeof(bool)));
             RegisterAllPorts();
-        }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildBinaryExpression(inputAstNodes[0],
-                                                    inputAstNodes[1],
-                                                    ProtoCore.DSASM.Operator.or);
         }
     }
 
@@ -2224,13 +1988,6 @@ namespace Dynamo.Nodes
 
             return Value.NewNumber(x + y);
         }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildBinaryExpression(inputAstNodes[0],
-                                                    inputAstNodes[1],
-                                                    ProtoCore.DSASM.Operator.add);
-        }
     }
 
     [NodeName("Subtract")]
@@ -2253,13 +2010,6 @@ namespace Dynamo.Nodes
             var y = ((Value.Number)args[1]).Item;
 
             return Value.NewNumber(x - y);
-        }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildBinaryExpression(inputAstNodes[0],
-                                                    inputAstNodes[1],
-                                                    ProtoCore.DSASM.Operator.sub);
         }
     }
 
@@ -2284,13 +2034,6 @@ namespace Dynamo.Nodes
 
             return Value.NewNumber(x * y);
         }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildBinaryExpression(inputAstNodes[0],
-                                                    inputAstNodes[1],
-                                                    ProtoCore.DSASM.Operator.mul);
-        }
     }
 
     [NodeName("Divide")]
@@ -2313,13 +2056,6 @@ namespace Dynamo.Nodes
             var y = ((Value.Number)args[1]).Item;
 
             return Value.NewNumber(x / y);
-        }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildBinaryExpression(inputAstNodes[0],
-                                                    inputAstNodes[1],
-                                                    ProtoCore.DSASM.Operator.div);
         }
     }
 
@@ -2345,13 +2081,6 @@ namespace Dynamo.Nodes
 
             return Value.NewNumber(x % y);
         }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildBinaryExpression(inputAstNodes[0],
-                                                    inputAstNodes[1],
-                                                    ProtoCore.DSASM.Operator.mod);
-        }
     }
 
     [NodeName("Power")]
@@ -2376,11 +2105,6 @@ namespace Dynamo.Nodes
 
             return Value.NewNumber(Math.Pow(x,y));
         }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildFunctionCall("Math.Pow", inputAstNodes);
-        }
     }
 
     [NodeName("Round")]
@@ -2401,11 +2125,6 @@ namespace Dynamo.Nodes
             return Value.NewNumber(
                Math.Round(((Value.Number)args[0]).Item)
             );
-        }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildFunctionCall("Math.Round", inputAstNodes);
         }
     }
 
@@ -2429,11 +2148,6 @@ namespace Dynamo.Nodes
                Math.Floor(((Value.Number)args[0]).Item)
             );
         }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildFunctionCall("Math.Floor", inputAstNodes);
-        }
     }
 
     [NodeName("Ceiling")]
@@ -2455,11 +2169,6 @@ namespace Dynamo.Nodes
             return Value.NewNumber(
                Math.Ceiling(((Value.Number)args[0]).Item)
             );
-        }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildFunctionCall("Math.Ceiling", inputAstNodes);
         }
     }
 
@@ -2511,11 +2220,6 @@ namespace Dynamo.Nodes
         {
             return Value.NewNumber(random.NextDouble());
         }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildFunctionCall("Math.Rand", inputAstNodes);
-        }
     }
 
     [NodeName("e")]
@@ -2540,6 +2244,14 @@ namespace Dynamo.Nodes
             set { }
         }
 
+        public override AssociativeNode AstIdentifier
+        {
+            get
+            {
+                return AstFactory.BuildDoubleNode(Math.E);
+            }
+        }
+
         protected internal override INode Build(Dictionary<NodeModel, Dictionary<int, INode>> preBuilt, int outPort)
         {
             Dictionary<int, INode> result;
@@ -2550,11 +2262,6 @@ namespace Dynamo.Nodes
                 preBuilt[this] = result;
             }
             return result[outPort];
-        }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildExprList(new List<string> { "Math", "E" });
         }
     }
 
@@ -2580,15 +2287,11 @@ namespace Dynamo.Nodes
             set { }
         }
 
-        protected override AssociativeNode DefaultAstExpression
+        public override AssociativeNode AstIdentifier
         {
             get
             {
-                if (defaultAstExpression == null)
-                {
-                    defaultAstExpression = AstBuilder.BuildExprList(new List<string> { "Math", "PI" });
-                }
-                return defaultAstExpression;
+                return AstFactory.BuildDoubleNode(Math.PI);
             }
         }
 
@@ -2627,17 +2330,11 @@ namespace Dynamo.Nodes
             set { }
         }
 
-        protected override AssociativeNode DefaultAstExpression
+        public override AssociativeNode AstIdentifier
         {
             get
             {
-                if (defaultAstExpression == null)
-                {
-                    var lhs = AstBuilder.BuildIntNode(2); 
-                    var rhs = AstBuilder.BuildExprList(new List<string> { "Math", "PI" });
-                    defaultAstExpression = AstBuilder.BuildBinaryExpression(lhs, rhs, ProtoCore.DSASM.Operator.mul);
-                }
-                return defaultAstExpression;
+                return AstFactory.BuildDoubleNode(Math.PI * 2);
             }
         }
 
@@ -2688,11 +2385,6 @@ namespace Dynamo.Nodes
                 return Value.NewNumber(Math.Sin(theta));
             }
         }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildFunctionCall("Math.Sin", inputAstNodes);
-        }
     }
 
     [NodeName("Cosine")]
@@ -2728,11 +2420,6 @@ namespace Dynamo.Nodes
                 double theta = ((Value.Number)input).Item;
                 return Value.NewNumber(Math.Cos(theta));
             }
-        }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildFunctionCall("Math.Cos", inputAstNodes);
         }
     }
 
@@ -2770,11 +2457,6 @@ namespace Dynamo.Nodes
                 return Value.NewNumber(Math.Tan(theta));
             }
         }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildFunctionCall("Math.Tan", inputAstNodes);
-        }
     }
 
     [NodeName("Average")]
@@ -2803,12 +2485,6 @@ namespace Dynamo.Nodes
 
             return Value.NewNumber(average);
         }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildFunctionCall("Average", inputAstNodes);
-        }
- 
     }
 
     /// <summary>
@@ -3061,13 +2737,6 @@ namespace Dynamo.Nodes
         {
             return new ConditionalNode(portNames);
         }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildConditionalNode(inputAstNodes[0],
-                                                   inputAstNodes[1],
-                                                   inputAstNodes[2]);
-        }
     }
     
     [NodeName("Debug Breakpoint")]
@@ -3181,9 +2850,9 @@ namespace Dynamo.Nodes
             nodeElement.AppendChild(outEl);
         }
 
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
+        protected override AssociativeNode BuildAstNode(IAstBuilder builder, List<AssociativeNode> inputs)
         {
-            return AstBuilder.BuildDoubleNode(Value);
+            return builder.Build(this, inputs);
         }
     }
 
@@ -3194,9 +2863,9 @@ namespace Dynamo.Nodes
             return FScheme.Value.NewNumber(Value ? 1 : 0);
         }
 
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
+        protected override AssociativeNode BuildAstNode(IAstBuilder builder, List<AssociativeNode> inputs)
         {
-            return AstBuilder.BuildBooleanNode(Value);
+            return builder.Build(this, inputs);
         }
     }
 
@@ -3212,9 +2881,10 @@ namespace Dynamo.Nodes
             return "\"" + base.PrintExpression() + "\"";
         }
 
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
+        protected override AssociativeNode BuildAstNode(IAstBuilder builder, List<AssociativeNode> inputs)
         {
-            return AstBuilder.BuildStringNode(Value); 
+            return builder.Build(this, inputs);
+            
         }
     }
 
@@ -3387,10 +3057,10 @@ namespace Dynamo.Nodes
                 : FScheme.Value.NewList(Utils.SequenceToFSharpList(_parsed.Select(x => x.GetFSchemeValue(paramDict))));
         }
 
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
+        protected override AssociativeNode BuildAstNode(IAstBuilder builder, List<AssociativeNode> inputs)
         {
             var paramDict = InPortData.Select(x => x.NickName)
-                .Zip(inputAstNodes, Tuple.Create)
+                .Zip(inputs, Tuple.Create)
                 .ToDictionary(x => x.Item1, x => x.Item2);
 
             if (_parsed.Count == 1)
@@ -3400,7 +3070,7 @@ namespace Dynamo.Nodes
             else
             {
                 List<AssociativeNode> nodes = _parsed.Select(x => x.GetAstNode(paramDict)).ToList();
-                return AstBuilder.BuildExprList(nodes);
+                return AstFactory.BuildExprList(nodes);
             }
         }
 
@@ -3443,7 +3113,7 @@ namespace Dynamo.Nodes
                 }
                 else
                 {
-                    return AstBuilder.BuildDoubleNode(_result.GetValueOrDefault());
+                    return new DoubleNode { value = _result.GetValueOrDefault().ToString() };
                 }
             }
         }
@@ -3703,7 +3373,7 @@ namespace Dynamo.Nodes
 
             public AssociativeNode GetAstNode(Dictionary<string, AssociativeNode> idLookup)
             {
-                return AstBuilder.BuildDoubleNode(_d);
+                return AstFactory.BuildDoubleNode(_d);
             }
         }
     }
@@ -4001,18 +3671,6 @@ namespace Dynamo.Nodes
         {
             return "\"" + base.PrintExpression() + "\"";
         }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            if (string.IsNullOrEmpty(Value))
-            {
-                return AstBuilder.BuildNullNode();
-            }
-            else
-            {
-                return AstBuilder.BuildStringNode(Value);
-            }
-        }
     }
 
     #endregion
@@ -4082,13 +3740,6 @@ namespace Dynamo.Nodes
         public override Value Evaluate(FSharpList<Value> args)
         {
             return Value.NewString(string.Concat(args.Cast<Value.String>().Select(x => x.Item)));
-        }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildBinaryExpression(inputAstNodes[0],
-                                                    inputAstNodes[1],
-                                                    ProtoCore.DSASM.Operator.add);
         }
     }
 
@@ -4161,11 +3812,6 @@ namespace Dynamo.Nodes
         public override Value Evaluate(FSharpList<Value> args)
         {
             return Value.NewString(NodeModel.BuildValueString(args[0],0,10000,0, 25));
-        }
-
-        protected override AssociativeNode CompileToAstNodeInternal(List<AssociativeNode> inputAstNodes)
-        {
-            return AstBuilder.BuildFunctionCall("ToString", inputAstNodes);
         }
     }
 
