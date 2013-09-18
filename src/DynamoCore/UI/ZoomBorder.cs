@@ -6,6 +6,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Dynamo.UI.Commands;
 using Dynamo.ViewModels;
+using Dynamo.Utilities;
 using Microsoft.Practices.Prism.ViewModel;
 using System.Windows.Resources;
 using System;
@@ -17,6 +18,7 @@ namespace Dynamo.Controls
         private UIElement child = null;
         private Point origin;
         private Point start;
+
         private bool _panMode;
         public bool PanMode
         {
@@ -28,7 +30,7 @@ namespace Dynamo.Controls
             set
             {
                 if (value)
-                    this.Cursor = Cursors.Hand;
+                    this.Cursor = CursorsLibrary.HandPan;
                 else
                     this.Cursor = Cursors.Arrow;
                 _panMode = value;
@@ -85,15 +87,13 @@ namespace Dynamo.Controls
                 //this.MouseLeftButtonUp += child_MouseLeftButtonUp;
                 this.PreviewMouseUp += child_MouseUp;
                 this.PreviewMouseDown += child_MouseDown;
-
+                this.KeyDown += child_KeyDown;
                 this.MouseMove += child_MouseMove;
                 //this.PreviewMouseRightButtonDown += new MouseButtonEventHandler(
                 //  child_PreviewMouseRightButtonDown);
             }
 
-            //Uri uri = new Uri("pack://application:,,,/DesignScriptStudio.Graph.Ui;component/Resources/" + resource.Value);
-            //StreamResourceInfo cursorStream = Application.GetResourceStream(uri);
-            //new Cursor(cursorStream.Stream);
+            
         }
 
         public void Reset()
@@ -182,7 +182,7 @@ namespace Dynamo.Controls
                 var tt = GetTranslateTransform(child);
                 start = e.GetPosition(this);
                 origin = new Point(tt.X, tt.Y);
-                this.Cursor = Cursors.Hand;
+                this.Cursor = CursorsLibrary.HandPanActive;
                 child.CaptureMouse();
             }
         }
@@ -194,9 +194,11 @@ namespace Dynamo.Controls
                 || e.ChangedButton == MouseButton.Left && _panMode ))
             {
                 child.ReleaseMouseCapture();
-                
-                if ( !_panMode )
+
+                if (!_panMode)
                     this.Cursor = Cursors.Arrow;
+                else
+                    this.Cursor = CursorsLibrary.HandPan;
             }
         }
 
@@ -216,6 +218,14 @@ namespace Dynamo.Controls
                     tt.X = origin.X - v.X;
                     tt.Y = origin.Y - v.Y;
                 }
+            }
+        }
+
+        private void child_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                PanMode = false;
             }
         }
 
