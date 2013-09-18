@@ -536,6 +536,16 @@ limitations under the License.
   <ItemGroup>
     <Resource Include="UI\Images\tick_selected.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="UI\Images\pan_disabled.png" />
+    <Resource Include="UI\Images\pan_hover.png" />
+    <Resource Include="UI\Images\pan_normal.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="UI\Images\hand_drag.cur" />
+    <Resource Include="UI\Images\hand_pan.cur" />
+    <Resource Include="UI\Images\hand_pan_active.cur" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy /Y "$(SolutionDir)..\extern\DesignScript\*" "$(OutputPath)"</PostBuildEvent>
