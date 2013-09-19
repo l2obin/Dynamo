@@ -332,8 +332,6 @@ namespace Dynamo.ViewModels
             }
         }
 
-        private bool _consoleShowing;
-
         public string LogText
         {
             get { return DynamoLogger.Instance.LogText; }
@@ -341,30 +339,42 @@ namespace Dynamo.ViewModels
 
         public bool ConsoleShowing
         {
-            get { return _consoleShowing; }
+            get
+            {
+                return this.controller.DynamoSettings.ShowConsole;
+            }
             set
             {
-                _consoleShowing = value;
+                this.controller.DynamoSettings.ShowConsole = value;
+
                 RaisePropertyChanged("ConsoleShowing");
             }
         }
 
         public bool IsShowingConnectors
         {
-            get { return dynSettings.Controller.IsShowingConnectors; }
+            get
+            {
+                return this.controller.DynamoSettings.ShowConnector;
+            }
             set
             {
-                dynSettings.Controller.IsShowingConnectors = value;
+                this.controller.DynamoSettings.ShowConnector = value;
+
                 RaisePropertyChanged("IsShowingConnectors");
             }
         }
 
         public ConnectorType ConnectorType
         {
-            get { return dynSettings.Controller.ConnectorType; }
+            get
+            {
+                return this.controller.DynamoSettings.ConnectorType;
+            }
             set
             {
-                dynSettings.Controller.ConnectorType = value;
+                this.controller.DynamoSettings.ConnectorType = value;
+
                 RaisePropertyChanged("ConnectorType");
             }
         }
@@ -373,8 +383,6 @@ namespace Dynamo.ViewModels
 
         public DynamoViewModel(DynamoController controller)
         {
-            ConnectorType = ConnectorType.BEZIER;
-            
             //create the model
             _model = new DynamoModel();
             dynSettings.Controller.DynamoModel = _model;

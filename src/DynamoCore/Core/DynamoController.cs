@@ -73,7 +73,19 @@ namespace Dynamo
         public DynamoViewModel DynamoViewModel { get; internal set; }
         public DynamoModel DynamoModel { get; set; }
         public Dispatcher UIDispatcher { get; set; }
-        
+
+        private PreferenceSettings _dynamoSettings;
+        public PreferenceSettings DynamoSettings
+        {
+            get
+            {
+                if (_dynamoSettings == null)
+                    _dynamoSettings = PreferenceSettings.Load();
+
+                return _dynamoSettings;
+            }
+        }
+
         /// <summary>
         /// Testing flag is used to defer calls to run in the idle thread
         /// with the assumption that the entire test will be wrapped in an

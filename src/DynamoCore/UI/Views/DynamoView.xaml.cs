@@ -393,7 +393,8 @@ namespace Dynamo.Controls
 
         private void WindowClosed(object sender, EventArgs e)
         {
-
+            // Invoke PreferenceSetting to be saved
+            dynSettings.Controller.DynamoSettings.Save();
         }
 
         private void OverlayCanvas_OnMouseMove(object sender, MouseEventArgs e)
