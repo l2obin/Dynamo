@@ -15,6 +15,7 @@ using Dynamo.Search.SearchElements;
 using Dynamo.Selection;
 using Dynamo.UI.Commands;
 using Dynamo.Utilities;
+using Dynamo.Services;
 
 namespace Dynamo.ViewModels
 {
@@ -166,6 +167,7 @@ namespace Dynamo.ViewModels
         public DelegateCommand SubmitCommand { get; set; }
         public DelegateCommand PublishCurrentWorkspaceCommand { get; set; }
         public DelegateCommand PublishSelectedNodesCommand { get; set; }
+        public DelegateCommand ToggleCollectInfoCommand { get; set; }
 
         public DelegateCommand PanCommand { get; set; }
         public DelegateCommand ZoomInCommand { get; set; }
@@ -426,6 +428,14 @@ namespace Dynamo.ViewModels
             }
         }
 
+        public bool CollectInfoOption
+        {
+            get
+            {
+                return CollectInfoManager.Instance.CollectInfoOption;
+            }
+        }
+
         public bool AlternateDrawingContextAvailable
         {
             get { return dynSettings.Controller.VisualizationManager.AlternateDrawingContextAvailable; }
@@ -507,6 +517,7 @@ namespace Dynamo.ViewModels
             ReportABugCommand = new DelegateCommand(Controller.ReportABug, Controller.CanReportABug);
             GoToWikiCommand = new DelegateCommand(GoToWiki, CanGoToWiki);
             GoToSourceCodeCommand = new DelegateCommand(GoToSourceCode, CanGoToSourceCode);
+            ToggleCollectInfoCommand = new DelegateCommand(ToggleCollectInfo, CanToggleCollectInfo);
 
             ShowPackageManagerSearchCommand = new DelegateCommand(ShowPackageManagerSearch, CanShowPackageManagerSearch);
             ShowInstalledPackagesCommand = new DelegateCommand(ShowInstalledPackages, CanShowInstalledPackages);
@@ -553,6 +564,8 @@ namespace Dynamo.ViewModels
                 }
             };
 
+            CollectInfoManager.Instance.PropertyChanged += CollectInfoManager_PropertyChanged;
+
             WatchIsResizable = false;
         }
 
@@ -565,6 +578,16 @@ namespace Dynamo.ViewModels
                     break;
                 case "ShowGeometryInAlternateContext":
                     RaisePropertyChanged("ShowGeometryInAlternateContext");
+                    break;
+            }
+        }
+
+        void CollectInfoManager_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case "CollectInfoOption":
+                    RaisePropertyChanged("CollectInfoOption");
                     break;
             }
         }
@@ -1206,6 +1229,16 @@ namespace Dynamo.ViewModels
         }
 
         internal bool CanGoToSourceCode(object parameter)
+        {
+            return true;
+        }
+
+        public void ToggleCollectInfo(object parameter)
+        {
+            CollectInfoManager.Instance.ToggleCollectInfoOption();
+        }
+
+        internal bool CanToggleCollectInfo(object parameter)
         {
             return true;
         }
