@@ -167,7 +167,7 @@ namespace Dynamo.ViewModels
         public DelegateCommand SubmitCommand { get; set; }
         public DelegateCommand PublishCurrentWorkspaceCommand { get; set; }
         public DelegateCommand PublishSelectedNodesCommand { get; set; }
-        public DelegateCommand ToggleCollectInfoCommand { get; set; }
+        public DelegateCommand ToggleIsUsageReportingApprovedCommand { get; set; }
 
         public DelegateCommand PanCommand { get; set; }
         public DelegateCommand ZoomInCommand { get; set; }
@@ -426,11 +426,11 @@ namespace Dynamo.ViewModels
             }
         }
 
-        public bool CollectInfoOption
+        public bool IsUsageReportingApproved
         {
             get
             {
-                return CollectInfoManager.Instance.CollectInfoOption;
+                return UsageReportingManager.Instance.IsUsageReportingApproved;
             }
         }
 
@@ -515,7 +515,7 @@ namespace Dynamo.ViewModels
             ReportABugCommand = new DelegateCommand(Controller.ReportABug, Controller.CanReportABug);
             GoToWikiCommand = new DelegateCommand(GoToWiki, CanGoToWiki);
             GoToSourceCodeCommand = new DelegateCommand(GoToSourceCode, CanGoToSourceCode);
-            ToggleCollectInfoCommand = new DelegateCommand(ToggleCollectInfo, CanToggleCollectInfo);
+            ToggleIsUsageReportingApprovedCommand = new DelegateCommand(ToggleIsUsageReportingApproved, CanToggleIsUsageReportingApproved);
 
             ShowPackageManagerSearchCommand = new DelegateCommand(ShowPackageManagerSearch, CanShowPackageManagerSearch);
             ShowInstalledPackagesCommand = new DelegateCommand(ShowInstalledPackages, CanShowInstalledPackages);
@@ -558,7 +558,7 @@ namespace Dynamo.ViewModels
                 }
             };
 
-            CollectInfoManager.Instance.PropertyChanged += CollectInfoManager_PropertyChanged;
+            UsageReportingManager.Instance.PropertyChanged += CollectInfoManager_PropertyChanged;
 
             WatchIsResizable = false;
         }
@@ -1227,12 +1227,12 @@ namespace Dynamo.ViewModels
             return true;
         }
 
-        public void ToggleCollectInfo(object parameter)
+        public void ToggleIsUsageReportingApproved(object parameter)
         {
-            CollectInfoManager.Instance.ToggleCollectInfoOption();
+            UsageReportingManager.Instance.ToggleUsageReportingAgreement();
         }
 
-        internal bool CanToggleCollectInfo(object parameter)
+        internal bool CanToggleIsUsageReportingApproved(object parameter)
         {
             return true;
         }

@@ -292,7 +292,7 @@
                     </MenuItem>
                     
                     <MenuItem Header="_Settings" Name="settingsMenu" Focusable="False">
-                        <MenuItem Header="_Enable usability data reporting" Command="{Binding ToggleCollectInfoCommand}" IsChecked="{Binding Path=CollectInfoOption, Mode=OneWay}" Name="CollectInfoCommand" Focusable="False"
+                        <MenuItem Header="_Enable usability data reporting" Command="{Binding ToggleIsUsageReportingApprovedCommand}" IsChecked="{Binding Path=IsUsageReportingApproved, Mode=OneWay, Source=dynSettings.UsageReportingManager}" Name="ToggleIsUsageReportingApprovedCommand" Focusable="False"
                                   IsCheckable="True"/>
                     </MenuItem>
 
