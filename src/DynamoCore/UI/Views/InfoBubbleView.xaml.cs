@@ -129,8 +129,6 @@ namespace Dynamo.Controls
         private void CountDownDoubleAnimation_Completed(object sender, EventArgs e)
         {
             //Console.WriteLine("FadeOut done");
-            fadeInStoryBoard.Stop(this);
-            fadeOutStoryBoard.Stop(this);
 
             mainGrid.Opacity = 0;
             mainGrid.Visibility = Visibility.Collapsed;
@@ -325,7 +323,7 @@ namespace Dynamo.Controls
             {
                 mainGrid.Visibility = Visibility.Visible;
                 // Run animation and skip it to end state i.e. MaxOpacity
-                fadeInStoryBoard.Begin(this);
+                fadeInStoryBoard.Begin(this, true);
                 fadeInStoryBoard.SkipToFill(this);
             }
         }
@@ -336,7 +334,7 @@ namespace Dynamo.Controls
             if (mainGrid.Visibility == System.Windows.Visibility.Visible)
             {
                 mainGrid.Visibility = Visibility.Collapsed;
-                fadeOutStoryBoard.Begin(this);
+                fadeOutStoryBoard.Begin(this, true);
                 fadeOutStoryBoard.SkipToFill(this);
             }
         }
@@ -350,9 +348,8 @@ namespace Dynamo.Controls
                 !dynSettings.Controller.DynamoViewModel.CurrentSpaceViewModel.CanShowInfoBubble)
                 return;
 
-            fadeOutStoryBoard.Stop(this);
             mainGrid.Visibility = Visibility.Visible;
-            fadeInStoryBoard.Begin(this);
+            fadeInStoryBoard.Begin(this, true);
         }
 
         private void FadeOutInfoBubble()
@@ -363,9 +360,8 @@ namespace Dynamo.Controls
             if (this.ViewModel.InfoBubbleState == InfoBubbleViewModel.State.Pinned)
                 return;
 
-            fadeInStoryBoard.Stop(this);
             mainGrid.Visibility = Visibility.Collapsed;
-            fadeOutStoryBoard.Begin(this);
+            fadeOutStoryBoard.Begin(this, true);
         }
 
         private void ContentContainer_MouseEnter(object sender, MouseEventArgs e)
